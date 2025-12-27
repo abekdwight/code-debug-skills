@@ -1,5 +1,4 @@
 import fs from 'node:fs/promises'
-import { DEFAULT_MAX_BODY_KB } from './constants'
 import { getPidPath, getRuntimeDir, getRuntimePath } from './paths'
 
 export type RuntimeInfo = {
@@ -31,19 +30,7 @@ export type RuntimeInfo = {
 export async function readRuntime(logsDir: string): Promise<RuntimeInfo | null> {
   try {
     const raw = await fs.readFile(getRuntimePath(logsDir), 'utf8')
-    const parsed = JSON.parse(raw) as RuntimeInfo
-    const options = parsed.options ?? {
-      maxBodyKB: DEFAULT_MAX_BODY_KB,
-      tokenEnabled: false,
-    }
-    return {
-      ...parsed,
-      options: {
-        maxBodyKB: options.maxBodyKB ?? DEFAULT_MAX_BODY_KB,
-        tokenEnabled: options.tokenEnabled ?? false,
-        idleTtlMs: options.idleTtlMs,
-      },
-    }
+    return JSON.parse(raw) as RuntimeInfo
   } catch {
     return null
   }

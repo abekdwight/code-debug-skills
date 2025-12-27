@@ -70,6 +70,11 @@ async function handleStart(): Promise<void> {
   const resolvedLogsDir = resolveLogsDir({ cwd, logsDir })
   const runtime = await readRuntime(resolvedLogsDir)
 
+  if (runtime && !runtime.options) {
+    outputLegacyRuntimeError()
+    return
+  }
+
   if (runtime && isProcessAlive(runtime.pid) && !args.force) {
     const payload = buildStartOutput(runtime, true)
     outputStart(payload)
@@ -143,6 +148,10 @@ async function handleStatus(): Promise<void> {
 
   if (!runtime) {
     outputStatus({ ok: false, running: false, error: 'not_running' })
+    return
+  }
+  if (!runtime.options) {
+    outputLegacyRuntimeError()
     return
   }
 
@@ -295,6 +304,16 @@ function outputError(message: string): void {
     outputJson({ ok: false, error: message })
   } else {
     process.stderr.write(`${message}\n`)
+  }
+}
+
+function outputLegacyRuntimeError(): void {
+  const error = 'legacy_runtime_incompatible'
+  const hint = 'delete .logs/runtime.json or the entire .logs directory, then retry'
+  if (json) {
+    outputJson({ ok: false, error, hint })
+  } else {
+    process.stderr.write(`${error}: ${hint}\n`)
   }
 }
 
