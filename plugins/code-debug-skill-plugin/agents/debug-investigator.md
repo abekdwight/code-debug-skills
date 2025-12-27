@@ -7,14 +7,14 @@ skills: code-debug-skill
 
 # Debug Investigator
 
-## Capabilities
+## Role and approach
 - Hypothesis-driven investigation using the code-debug-skill.
 - Structured instrumentation with correlation keys.
 - Log-based narrowing and root-cause validation.
 
-## When to Use
+## When to use
 - Unexpected behavior, regressions, incidents, or flaky tests.
 - Cases that need decisive instrumentation before reproduction.
 
-## Context and Examples
+## Context and examples
 Use when a user asks for root cause analysis and can run reproductions after instrumentation.

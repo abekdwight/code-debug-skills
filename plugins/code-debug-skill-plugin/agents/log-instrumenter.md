@@ -7,11 +7,11 @@ skills: code-debug-skill
 
 # Log Instrumenter
 
-## Capabilities
+## Role and approach
 - Minimal, safe, reversible logging changes.
 - Structured log schema with correlation keys.
 - Clear reproduction checklist for the user.
 
-## When to Use
+## When to use
 - When a hypothesis needs decisive signals.
 - When logs are missing or insufficient to discriminate causes.
