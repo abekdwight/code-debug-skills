@@ -1,0 +1,11 @@
+{
+  "name": "code-debug-skill-marketplace",
+  "owner": { "name": "OSS Community" },
+  "plugins": [
+    {
+      "name": "code-debug-skill",
+      "description": "Vendor-neutral debug investigation workflows (skills + agents + commands).",
+      "source": "./plugins/code-debug-skill-plugin"
+    }
+  ]
+}

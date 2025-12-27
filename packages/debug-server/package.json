@@ -1,0 +1,45 @@
+{
+  "name": "@debug/server",
+  "version": "1.0.0",
+  "description": "Local debug log collector server (HTTP ingest + .logs) for hypothesis-driven investigation.",
+  "bin": {
+    "debug-server": "dist/cli.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "test": "vitest run"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "minimist": "^1.2.8"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@types/minimist": "^1.2.5",
+    "@types/node": "^20.11.30",
+    "@types/supertest": "^6.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.50.1",
+    "@typescript-eslint/parser": "^8.50.1",
+    "eslint": "^9.39.2",
+    "execa": "^9.5.0",
+    "globals": "^16.5.0",
+    "prettier": "^3.3.3",
+    "supertest": "^7.1.4",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vitest": "^3.0.4"
+  }
+}

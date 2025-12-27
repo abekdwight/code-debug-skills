@@ -1,0 +1,16 @@
+{
+  "name": "code-debug-skills",
+  "private": true,
+  "packageManager": "pnpm@10.26.2",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "pnpm --filter @debug/server build",
+    "lint": "pnpm --filter @debug/server lint",
+    "typecheck": "pnpm --filter @debug/server typecheck",
+    "test": "pnpm --filter @debug/server test",
+    "format": "pnpm --filter @debug/server format",
+    "format:write": "pnpm --filter @debug/server format:write"
+  }
+}
