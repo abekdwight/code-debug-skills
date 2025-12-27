@@ -13,7 +13,7 @@ The goal is to standardize the "instrument → reproduce → observe" loop witho
 Install-free usage with npx:
 
 ```
-npx @debug/server@latest start --json
+npx @abekdwight/debug-server@latest start --json
 ```
 
 The `start` command launches a background process, prints a single JSON line on stdout, and exits. The output includes connection info and snippets you can paste into the target code.
@@ -21,13 +21,13 @@ The `start` command launches a background process, prints a single JSON line on 
 To stop:
 
 ```
-npx @debug/server@latest stop --json
+npx @abekdwight/debug-server@latest stop --json
 ```
 
 To check status:
 
 ```
-npx @debug/server@latest status --json
+npx @abekdwight/debug-server@latest status --json
 ```
 
 ## Log schema (minimal standard)

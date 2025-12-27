@@ -1,5 +1,5 @@
 {
-  "name": "@debug/server",
+  "name": "@abekdwight/debug-server",
   "version": "0.0.1",
   "description": "Local debug log collector server (HTTP ingest + .logs) for hypothesis-driven investigation.",
   "bin": {

@@ -1,4 +1,4 @@
-# @debug/server
+# @abekdwight/debug-server
 
 Local debug log collector server (HTTP ingest + .logs) for hypothesis-driven investigation.
 
@@ -7,23 +7,23 @@ Local debug log collector server (HTTP ingest + .logs) for hypothesis-driven inv
 Start in background and print JSON connection info:
 
 ```
-npx @debug/server@latest start --json
+npx @abekdwight/debug-server@latest start --json
 ```
 
 Run in foreground:
 
 ```
-npx @debug/server@latest run
+npx @abekdwight/debug-server@latest run
 ```
 
 Stop:
 
 ```
-npx @debug/server@latest stop --json
+npx @abekdwight/debug-server@latest stop --json
 ```
 
 Status:
 
 ```
-npx @debug/server@latest status --json
+npx @abekdwight/debug-server@latest status --json
 ```

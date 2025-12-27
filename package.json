@@ -6,11 +6,11 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "pnpm --filter @debug/server build",
-    "lint": "pnpm --filter @debug/server lint",
-    "typecheck": "pnpm --filter @debug/server typecheck",
-    "test": "pnpm --filter @debug/server test",
-    "format": "pnpm --filter @debug/server format",
-    "format:write": "pnpm --filter @debug/server format:write"
+    "build": "pnpm --filter @abekdwight/debug-server build",
+    "lint": "pnpm --filter @abekdwight/debug-server lint",
+    "typecheck": "pnpm --filter @abekdwight/debug-server typecheck",
+    "test": "pnpm --filter @abekdwight/debug-server test",
+    "format": "pnpm --filter @abekdwight/debug-server format",
+    "format:write": "pnpm --filter @abekdwight/debug-server format:write"
   }
 }
