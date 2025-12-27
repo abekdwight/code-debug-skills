@@ -85,4 +85,23 @@ describe('debug observer server', () => {
 
     await started.close()
   })
+
+  it('responds to CORS preflight', async () => {
+    const started = await startServer({
+      host: '127.0.0.1',
+      port: 0,
+      basePath: '/',
+      logsDir: path.join(tempDir, 'logs'),
+      maxBodyKB: 64,
+      cwd: tempDir,
+    })
+
+    const request = supertest(started.baseUrl)
+
+    const response = await request.options('/ingest/test-stream').expect(204)
+    expect(response.headers['access-control-allow-origin']).toBe('*')
+    expect(response.headers['access-control-allow-methods']).toContain('POST')
+
+    await started.close()
+  })
 })

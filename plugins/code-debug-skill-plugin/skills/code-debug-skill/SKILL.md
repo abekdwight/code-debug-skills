@@ -19,7 +19,8 @@ description: Standardized, hypothesis-driven debug investigation workflow for un
 ## Tool selection (what to use)
 - Primary tool for new instrumentation: local HTTP ingest logger.
   - Start via `npx @abekdwight/debug-server@latest start --json`.
-  - Keep the JSON output to derive snippet endpoints for logging.
+  - Use the JSON output to copy the snippet and endpoint.
+  - The server accepts CORS preflight (OPTIONS), so the default JSON snippet works across origins.
 - If reproduction is possible, prioritize logs/metrics that directly test predictions.
 - If reproduction is not possible, pivot to existing signals:
   - logs/metrics/traces, config diffs, data snapshots, dumps, and deterministic probes.

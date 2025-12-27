@@ -28,6 +28,12 @@ export type StartedServer = {
 }
 
 const REQUIRED_FIELDS = ['timestamp', 'message', 'sessionId', 'runId', 'hypothesisId'] as const
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Debug-Token',
+  'Access-Control-Max-Age': '86400',
+} as const
 
 export async function startServer(options: StartOptions): Promise<StartedServer> {
   const logsDir = resolveLogsDir({ cwd: options.cwd, logsDir: options.logsDir })
@@ -38,12 +44,18 @@ export async function startServer(options: StartOptions): Promise<StartedServer>
 
   let idleTimer: NodeJS.Timeout | undefined
   const server = http.createServer(async (req, res) => {
+    applyCorsHeaders(res)
     try {
       const url = new URL(req.url ?? '/', baseUrl)
       const normalizedPath = stripBasePath(url.pathname, basePath)
 
       if (normalizedPath == null) {
         respondJson(res, 404, { ok: false, error: 'not_found' })
+        return
+      }
+
+      if (req.method === 'OPTIONS') {
+        respondNoContent(res, 204)
         return
       }
 
@@ -201,6 +213,17 @@ function respondJson(res: http.ServerResponse, status: number, payload: unknown)
   res.setHeader('Content-Type', 'application/json')
   res.setHeader('Content-Length', Buffer.byteLength(data))
   res.end(data)
+}
+
+function respondNoContent(res: http.ServerResponse, status: number): void {
+  res.statusCode = status
+  res.end()
+}
+
+function applyCorsHeaders(res: http.ServerResponse): void {
+  for (const [key, value] of Object.entries(CORS_HEADERS)) {
+    res.setHeader(key, value)
+  }
 }
 
 class BodyTooLargeError extends Error {}

@@ -1,6 +1,6 @@
 {
   "name": "@abekdwight/debug-server",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Local debug log collector server (HTTP ingest + .logs) for hypothesis-driven investigation.",
   "bin": {
     "debug-server": "dist/cli.js"

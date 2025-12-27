@@ -10,6 +10,8 @@ Start in background and print JSON connection info:
 npx @abekdwight/debug-server@latest start --json
 ```
 
+The server responds to CORS preflight (OPTIONS), so the default JSON snippet works across origins.
+
 Run in foreground:
 
 ```
