@@ -36,10 +36,16 @@ description: Standardized, hypothesis-driven debug investigation workflow for un
 - Logs must never throw, avoid secrets/PII, and be easy to remove.
 - Record location, message, timestamp, and correlation fields in every event.
 - When proposing code changes, also propose removal/disable strategy.
+- AI inserts instrumentation and provides the exact reproduction steps; the user performs the reproduction run and shares the resulting logs.
 
 ## User interaction rules
 - When reproduction is required, provide exact steps, expected signals, and required artifacts.
 - If reproduction is not possible, pivot to existing logs, metrics, traces, config diffs, or safe probes.
+
+## Cleanup policy
+- When the user confirms the issue is resolved or the investigation is closed, stop the debug server and delete all investigation logs (e.g., `.logs/`).
+- Do not use `git checkout`, `git clean`, or other bulk git cleanup for log deletion. Remove files explicitly and safely.
+- If deletion could affect unrelated files, confirm the exact paths before removal.
 
 ## Reporting format
 Use the template in `assets/report-template.md`.

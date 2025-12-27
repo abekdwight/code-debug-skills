@@ -31,11 +31,7 @@ Use this schema when instrumenting. Keep fields small, structured, and correlate
 ## Storage layout (recommended)
 ```
 .logs/
-  debug/
-    runtime.json
-    server.pid
-    sessions/
-      {sessionId}/
-        {YYYY-MM-DD}/
-          {runId}.jsonl
+  runtime.json
+  server.pid
+  {sessionId}-{runId}.jsonl
 ```

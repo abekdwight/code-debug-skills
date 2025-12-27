@@ -49,14 +49,9 @@ describe('debug observer server', () => {
 
     await started.close()
 
-    const logDate = new Date(REQUIRED_EVENT.timestamp).toISOString().slice(0, 10)
     const logPath = path.join(
       started.logsDir,
-      'debug',
-      'sessions',
-      REQUIRED_EVENT.sessionId,
-      logDate,
-      `${REQUIRED_EVENT.runId}.jsonl`,
+      `${REQUIRED_EVENT.sessionId}-${REQUIRED_EVENT.runId}.jsonl`,
     )
 
     const content = await fs.readFile(logPath, 'utf8')

@@ -53,13 +53,9 @@ Logs are written as JSONL under `.logs/`:
 
 ```
 .logs/
-  debug/
-    runtime.json
-    server.pid
-    sessions/
-      {sessionId}/
-        {YYYY-MM-DD}/
-          {runId}.jsonl
+  runtime.json
+  server.pid
+  {sessionId}-{runId}.jsonl
 ```
 
 ## Skill and plugin
