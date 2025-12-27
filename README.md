@@ -66,6 +66,31 @@ Logs are written as JSONL under `.logs/`:
 
 The Skill defines the standardized investigation workflow and instrumentation rules. The plugin bundles the Skill with commands and sub-agents.
 
+## Install in Claude Code (plugin)
+
+For external users, add this GitHub repository as a marketplace, then install the plugin:
+
+```
+/plugin marketplace add abekdwight/code-debug-skills
+/plugin install code-debug-skill@code-debug-skill-marketplace
+```
+
+Restart Claude Code after installation to load the plugin.
+
+## Install in Codex (skill)
+
+Place the skill folder in one of the supported skill locations and restart Codex:
+
+```
+# repo-scoped
+mkdir -p .codex/skills
+cp -R skills/code-debug-skill .codex/skills/
+
+# user-scoped (Mac/Linux default)
+mkdir -p ~/.codex/skills
+cp -R skills/code-debug-skill ~/.codex/skills/
+```
+
 ## Repository structure
 
 ```
