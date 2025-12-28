@@ -6,11 +6,12 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "pnpm --filter @abekdwight/debug-server build",
-    "lint": "pnpm --filter @abekdwight/debug-server lint",
-    "typecheck": "pnpm --filter @abekdwight/debug-server typecheck",
-    "test": "pnpm --filter @abekdwight/debug-server test",
-    "format": "pnpm --filter @abekdwight/debug-server format",
-    "format:write": "pnpm --filter @abekdwight/debug-server format:write"
+    "sync:skills": "node scripts/sync-skills.mjs",
+    "build": "pnpm run sync:skills && pnpm --filter debugsk build",
+    "lint": "pnpm --filter debugsk lint",
+    "typecheck": "pnpm --filter debugsk typecheck",
+    "test": "pnpm --filter debugsk test",
+    "format": "pnpm --filter debugsk format",
+    "format:write": "pnpm --filter debugsk format:write"
   }
 }

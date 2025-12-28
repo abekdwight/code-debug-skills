@@ -1,19 +1,41 @@
 # Debug Investigation Framework (Vendor Neutral)
 
-This repository provides a vendor-neutral, hypothesis-driven bug investigation framework as OSS. It contains:
+This repository provides a vendor-neutral, hypothesis-driven debug investigation framework as OSS. It contains:
 
-1. A local debug log collector server (npx command)
-2. A reusable Agent Skill for standardized investigation workflows
-3. A Claude Code plugin + marketplace entry for distribution
+1. **debugsk CLI** (server + Codex skill management)
+2. **Agent Skill** for standardized investigation workflows
+3. **Claude Code plugin** + marketplace entry for distribution
 
 The goal is to standardize the "instrument → reproduce → observe" loop without relying on any specific infrastructure or vendor.
+`debugsk` is short for **debug skill**.
+
+## Quick start (Claude Code)
+
+Add this GitHub repository as a marketplace, then install the plugin:
+
+```
+/plugin marketplace add abekdwight/code-debug-skills
+/plugin install code-debug-skill@code-debug-skill-marketplace
+```
+
+Restart Claude Code after installation to load the plugin.
+
+## Quick start (Codex)
+
+Use debugsk to install/update the skill, then restart Codex:
+
+```
+npx debugsk@latest codex install
+npx debugsk@latest codex update
+npx debugsk@latest codex remove
+```
 
 ## Quick start (local debug log server)
 
 Install-free usage with npx:
 
 ```
-npx @abekdwight/debug-server@latest start --json
+npx debugsk@latest server start --json
 ```
 
 The `start` command launches a background process, prints a single JSON line on stdout, and exits. The output includes connection info and snippets you can paste into the target code.
@@ -21,13 +43,13 @@ The `start` command launches a background process, prints a single JSON line on 
 To stop:
 
 ```
-npx @abekdwight/debug-server@latest stop --json
+npx debugsk@latest server stop --json
 ```
 
 To check status:
 
 ```
-npx @abekdwight/debug-server@latest status --json
+npx debugsk@latest server status --json
 ```
 
 ## Log schema (minimal standard)
@@ -60,44 +82,28 @@ Logs are written as JSONL under `.logs/`:
 
 ## Skill and plugin
 
-- Skill: `skills/code-debug-skill/`
+- Skill source of truth: `skills-src/code-debug-skill/`
+- Generated Codex skill: `skills/code-debug-skill/`
 - Claude Code plugin: `plugins/code-debug-skill-plugin/`
 - Marketplace file: `.claude-plugin/marketplace.json`
 
 The Skill defines the standardized investigation workflow and instrumentation rules. The plugin bundles the Skill with commands and sub-agents.
 
-## Install in Claude Code (plugin)
-
-For external users, add this GitHub repository as a marketplace, then install the plugin:
+Sync the skill source to all targets:
 
 ```
-/plugin marketplace add abekdwight/code-debug-skills
-/plugin install code-debug-skill@code-debug-skill-marketplace
-```
-
-Restart Claude Code after installation to load the plugin.
-
-## Install in Codex (skill)
-
-Place the skill folder in one of the supported skill locations and restart Codex:
-
-```
-# repo-scoped
-mkdir -p .codex/skills
-cp -R skills/code-debug-skill .codex/skills/
-
-# user-scoped (Mac/Linux default)
-mkdir -p ~/.codex/skills
-cp -R skills/code-debug-skill ~/.codex/skills/
+pnpm run sync:skills
 ```
 
 ## Repository structure
 
 ```
 packages/
-  debug-server/           # npx CLI + HTTP ingest server
+  debugsk/                # CLI + HTTP ingest server
 skills/
   code-debug-skill/       # Agent Skill (SKILL.md + references + assets)
+skills-src/
+  code-debug-skill/       # Skill source of truth
 plugins/
   code-debug-skill-plugin/
 .claude-plugin/

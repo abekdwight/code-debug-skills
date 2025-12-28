@@ -6,7 +6,7 @@ import { execa } from 'execa'
 
 const cliPath = path.resolve(__dirname, '../src/cli.ts')
 
-describe('debug server cli', () => {
+describe('debugsk cli', () => {
   let tempDir: string
 
   beforeEach(async () => {
@@ -60,5 +60,51 @@ describe('debug server cli', () => {
 
     const stopPayload = JSON.parse(stop.stdout) as Record<string, unknown>
     expect(stopPayload.ok).toBe(true)
+  })
+
+  it('codex install/remove lifecycle', async () => {
+    const dest = path.join(tempDir, 'codex', 'code-debug-skill')
+
+    const install = await execa(process.execPath, [
+      '--import',
+      'tsx',
+      cliPath,
+      'codex',
+      'install',
+      '--json',
+      '--dest',
+      dest,
+    ])
+
+    const installPayload = JSON.parse(install.stdout) as Record<string, unknown>
+    expect(installPayload.ok).toBe(true)
+
+    const status = await execa(process.execPath, [
+      '--import',
+      'tsx',
+      cliPath,
+      'codex',
+      'status',
+      '--json',
+      '--dest',
+      dest,
+    ])
+
+    const statusPayload = JSON.parse(status.stdout) as Record<string, unknown>
+    expect(statusPayload.installed).toBe(true)
+
+    const remove = await execa(process.execPath, [
+      '--import',
+      'tsx',
+      cliPath,
+      'codex',
+      'remove',
+      '--json',
+      '--dest',
+      dest,
+    ])
+
+    const removePayload = JSON.parse(remove.stdout) as Record<string, unknown>
+    expect(removePayload.ok).toBe(true)
   })
 })

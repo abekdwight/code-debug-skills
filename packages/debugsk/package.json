@@ -1,14 +1,15 @@
 {
-  "name": "@abekdwight/debug-server",
-  "version": "0.0.2",
-  "description": "Local debug log collector server (HTTP ingest + .logs) for hypothesis-driven investigation.",
+  "name": "debugsk",
+  "version": "0.0.1",
+  "description": "Debug investigation CLI: server + Codex skill management for hypothesis-driven workflows.",
   "bin": {
-    "debug-server": "dist/cli.js"
+    "debugsk": "dist/cli.js"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "skills"
   ],
   "scripts": {
     "build": "tsup",

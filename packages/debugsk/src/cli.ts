@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+import fs from 'node:fs/promises'
+import os from 'node:os'
+import path from 'node:path'
 import minimist from 'minimist'
 import {
   DEFAULT_BASE_PATH,
@@ -14,15 +17,20 @@ import { startServer } from './server'
 
 const args = minimist(process.argv.slice(2), {
   boolean: ['json', 'force', 'help'],
-  string: ['host', 'base-path', 'logs-dir', 'token'],
+  string: ['host', 'base-path', 'logs-dir', 'token', 'dest', 'codex-home'],
   alias: {
     h: 'help',
   },
 })
 
-const command = String(args._[0] ?? 'help')
+const primary = String(args._[0] ?? 'help')
+const secondary = args._[1] ? String(args._[1]) : undefined
+const scope = primary === 'server' || primary === 'codex' ? primary : 'server'
+const command =
+  scope === 'server' ? String(primary === 'server' ? secondary ?? 'help' : primary) : String(secondary ?? 'help')
 
 const json = Boolean(args.json)
+const SKILL_NAME = 'code-debug-skill'
 
 void main().catch((error) => {
   outputError(error instanceof Error ? error.message : 'unexpected_error')
@@ -32,6 +40,11 @@ void main().catch((error) => {
 async function main(): Promise<void> {
   if (args.help || command === 'help') {
     printHelp()
+    return
+  }
+
+  if (scope === 'codex') {
+    await handleCodex(command)
     return
   }
 
@@ -136,7 +149,7 @@ async function handleRun(): Promise<void> {
   installSignalHandlers(started.logsDir, started.close)
 
   if (!json) {
-    logInfo(`debug observer listening at ${started.baseUrl}`)
+    logInfo(`debugsk server listening at ${started.baseUrl}`)
   }
 }
 
@@ -181,6 +194,115 @@ async function handleStop(): Promise<void> {
   }
 
   outputStop({ ok: true, stopped, pid: runtime.pid })
+}
+
+async function handleCodex(subcommand: string): Promise<void> {
+  switch (subcommand) {
+    case 'install':
+      await codexInstall(false)
+      return
+    case 'update':
+      await codexInstall(true)
+      return
+    case 'remove':
+      await codexRemove()
+      return
+    case 'status':
+      await codexStatus()
+      return
+    default:
+      outputError(`unknown_command:codex:${subcommand}`)
+  }
+}
+
+async function codexInstall(force: boolean): Promise<void> {
+  const source = await resolveSkillSource()
+  const dest = resolveCodexDest()
+  const exists = await pathExists(dest)
+
+  if (exists && !force) {
+    outputError('codex_skill_already_installed')
+    return
+  }
+
+  await ensureSafeDest(dest)
+  if (exists) {
+    await fs.rm(dest, { recursive: true, force: true })
+  }
+
+  await fs.mkdir(path.dirname(dest), { recursive: true })
+  await fs.cp(source, dest, { recursive: true })
+
+  outputJsonResult({
+    ok: true,
+    action: force ? 'update' : 'install',
+    dest,
+    source,
+    replaced: exists,
+  })
+}
+
+async function codexRemove(): Promise<void> {
+  const dest = resolveCodexDest()
+  await ensureSafeDest(dest)
+  const exists = await pathExists(dest)
+  if (exists) {
+    await fs.rm(dest, { recursive: true, force: true })
+  }
+  outputJsonResult({
+    ok: true,
+    action: 'remove',
+    dest,
+    removed: exists,
+  })
+}
+
+async function codexStatus(): Promise<void> {
+  const dest = resolveCodexDest()
+  const installed = await pathExists(dest)
+  outputJsonResult({
+    ok: true,
+    action: 'status',
+    dest,
+    installed,
+  })
+}
+
+async function resolveSkillSource(): Promise<string> {
+  const packageRoot = path.resolve(__dirname, '..')
+  const repoRoot = path.resolve(packageRoot, '..', '..')
+  const repoSource = path.join(repoRoot, 'skills-src', SKILL_NAME)
+  if (await pathExists(repoSource)) return repoSource
+  const packaged = path.join(packageRoot, 'skills', SKILL_NAME)
+  if (await pathExists(packaged)) return packaged
+  throw new Error(`missing_skill_source:${SKILL_NAME}`)
+}
+
+function resolveCodexDest(): string {
+  if (args.dest) return path.resolve(String(args.dest))
+  const codexHome = args['codex-home']
+    ? path.resolve(String(args['codex-home']))
+    : process.env.CODEX_HOME
+      ? path.resolve(String(process.env.CODEX_HOME))
+      : path.join(os.homedir(), '.codex')
+  return path.join(codexHome, 'skills', SKILL_NAME)
+}
+
+async function ensureSafeDest(dest: string): Promise<void> {
+  const resolved = path.resolve(dest)
+  const root = path.parse(resolved).root
+  if (resolved === root || resolved === os.homedir()) {
+    throw new Error('unsafe_dest')
+  }
+}
+
+async function pathExists(target: string): Promise<boolean> {
+  try {
+    await fs.access(target)
+    return true
+  } catch {
+    return false
+  }
 }
 
 async function spawnBackground(options: {
@@ -299,6 +421,17 @@ function outputJson(payload: unknown): void {
   process.stdout.write(`${JSON.stringify(payload)}\n`)
 }
 
+function outputJsonResult(payload: Record<string, unknown>): void {
+  if (json) {
+    outputJson(payload)
+    return
+  }
+  const action = String(payload.action ?? 'result')
+  const ok = payload.ok ? 'ok' : 'error'
+  const dest = payload.dest ? `dest=${payload.dest}` : ''
+  process.stdout.write(`${action} ${ok} ${dest}\n`)
+}
+
 function outputError(message: string): void {
   if (json) {
     outputJson({ ok: false, error: message })
@@ -355,13 +488,21 @@ function outputStop(payload: Record<string, unknown>): void {
 }
 
 function printHelp(): void {
-  const text = `debug-server
+  const text = `debugsk
 
 Usage:
-  start --json            Start in background and print JSON connection info
-  run                    Run in foreground
-  status --json          Show runtime status
-  stop --json            Stop background server
+  server start --json     Start server in background and print JSON
+  server run              Run server in foreground
+  server status --json    Show server status
+  server stop --json      Stop background server
+
+  codex install           Install Codex skill (user scope)
+  codex update            Update Codex skill (user scope)
+  codex remove            Remove Codex skill (user scope)
+  codex status            Show Codex skill status
+
+Aliases:
+  start/run/status/stop   Same as "server <command>"
 
 Options:
   --host            (default ${DEFAULT_HOST})
@@ -373,6 +514,8 @@ Options:
   --idle-ttl-ms     (optional)
   --force           (restart even if already running)
   --json            (stdout JSON only)
+  --dest            (Codex skill destination path)
+  --codex-home      (override CODEX_HOME)
 `
   if (json) {
     outputJson({ ok: true, help: text })

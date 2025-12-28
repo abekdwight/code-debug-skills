@@ -8,7 +8,7 @@ importers:
 
   .: {}
 
-  packages/debug-server:
+  packages/debugsk:
     dependencies:
       minimist:
         specifier: ^1.2.8

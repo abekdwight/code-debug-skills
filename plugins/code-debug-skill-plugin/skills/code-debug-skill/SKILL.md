@@ -18,13 +18,13 @@ description: Standardized, hypothesis-driven debug investigation workflow for un
 
 ## Tool selection (what to use)
 - Primary tool for new instrumentation: local HTTP ingest logger.
-  - Start via `npx @abekdwight/debug-server@latest start --json`.
+  - Start via `npx debugsk@latest server start --json`.
   - Use the JSON output to copy the snippet and endpoint.
   - The server accepts CORS preflight (OPTIONS), so the default JSON snippet works across origins.
 - If reproduction is possible, prioritize logs/metrics that directly test predictions.
 - If reproduction is not possible, pivot to existing signals:
   - logs/metrics/traces, config diffs, data snapshots, dumps, and deterministic probes.
-- If native signals do not answer the question, prefer `@abekdwight/debug-server` for new observations.
+- If native signals do not answer the question, prefer `debugsk` for new observations.
   - This avoids contaminating native logging and keeps investigation logs isolated.
 - Use native logs as reference in addition to new instrumentation.
 
@@ -56,7 +56,7 @@ description: Standardized, hypothesis-driven debug investigation workflow for un
 
 ## Instrumentation policy
 - Prefer a local HTTP ingest logger when available; otherwise integrate with existing logging.
-- If native signals are insufficient, prioritize `@abekdwight/debug-server` over adding more native logs.
+- If native signals are insufficient, prioritize `debugsk` over adding more native logs.
 - Use native logs as reference alongside the added instrumentation.
 - Logs must never throw, avoid secrets/PII, and be easy to remove.
 - Record location, message, timestamp, and correlation fields in every event.
