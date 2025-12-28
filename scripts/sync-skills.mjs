@@ -5,9 +5,8 @@ import { fileURLToPath } from 'node:url'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.resolve(__dirname, '..')
 
-const source = path.join(repoRoot, 'skills-src', 'code-debug-skill')
+const source = path.join(repoRoot, 'skills', 'code-debug-skill')
 const targets = [
-  path.join(repoRoot, 'skills', 'code-debug-skill'),
   path.join(repoRoot, 'plugins', 'code-debug-skill-plugin', 'skills', 'code-debug-skill'),
   path.join(repoRoot, 'packages', 'debugsk', 'skills', 'code-debug-skill'),
 ]

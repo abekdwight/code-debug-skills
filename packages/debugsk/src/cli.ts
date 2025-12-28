@@ -271,7 +271,7 @@ async function codexStatus(): Promise<void> {
 async function resolveSkillSource(): Promise<string> {
   const packageRoot = path.resolve(__dirname, '..')
   const repoRoot = path.resolve(packageRoot, '..', '..')
-  const repoSource = path.join(repoRoot, 'skills-src', SKILL_NAME)
+  const repoSource = path.join(repoRoot, 'skills', SKILL_NAME)
   if (await pathExists(repoSource)) return repoSource
   const packaged = path.join(packageRoot, 'skills', SKILL_NAME)
   if (await pathExists(packaged)) return packaged

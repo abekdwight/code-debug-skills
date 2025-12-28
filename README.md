@@ -82,8 +82,7 @@ Logs are written as JSONL under `.logs/`:
 
 ## Skill and plugin
 
-- Skill source of truth: `skills-src/code-debug-skill/`
-- Generated Codex skill: `skills/code-debug-skill/`
+- Skill source of truth: `skills/code-debug-skill/`
 - Claude Code plugin: `plugins/code-debug-skill-plugin/`
 - Marketplace file: `.claude-plugin/marketplace.json`
 
@@ -102,8 +101,6 @@ packages/
   debugsk/                # CLI + HTTP ingest server
 skills/
   code-debug-skill/       # Agent Skill (SKILL.md + references + assets)
-skills-src/
-  code-debug-skill/       # Skill source of truth
 plugins/
   code-debug-skill-plugin/
 .claude-plugin/
