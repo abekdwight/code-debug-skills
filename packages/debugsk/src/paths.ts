@@ -27,7 +27,6 @@ export function getSessionLogPath(
   logsDir: string,
   sessionId: string,
   runId: string,
-  _timestamp: string | number,
 ): string {
   const safeSession = sanitizePathSegment(sessionId)
   const safeRun = sanitizePathSegment(runId)

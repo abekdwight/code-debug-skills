@@ -97,8 +97,7 @@ export async function startServer(options: StartOptions): Promise<StartedServer>
         const event = payload as Record<string, unknown>
         const sessionId = String(event.sessionId)
         const runId = String(event.runId)
-        const timestamp = event.timestamp as string | number
-        const logPath = getSessionLogPath(logsDir, sessionId, runId, timestamp)
+        const logPath = getSessionLogPath(logsDir, sessionId, runId)
         await fs.mkdir(path.dirname(logPath), { recursive: true })
 
         const enriched = {
