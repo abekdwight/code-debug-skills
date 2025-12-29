@@ -1,13 +1,6 @@
-# Debug Investigation Framework (Vendor Neutral)
+# Debug Investigation Skills
 
-This repository provides a vendor-neutral, hypothesis-driven debug investigation framework as OSS. It contains:
-
-1. **debugsk CLI** (server + Codex skill management)
-2. **Agent Skill** for standardized investigation workflows
-3. **Claude Code plugin** + marketplace entry for distribution
-
-The goal is to standardize the "instrument → reproduce → observe" loop without relying on any specific infrastructure or vendor.
-`debugsk` is short for **debug skill**.
+This repository standardizes the hypothesis-driven debugging process as reusable Skills for Claude Code and Codex, and provides a CLI with a local log server to make investigation instrumentation easy.
 
 ## Quick start (Claude Code)
 
@@ -22,6 +15,8 @@ Restart Claude Code after installation to load the plugin.
 
 ## Quick start (Codex)
 
+Codex also supports interactive installs via [`$skill-installer`](https://developers.openai.com/codex/skills#create-a-skill), but it installs into `$CODEX_HOME/skills` (default `~/.codex/skills`), aborts if the destination already exists, and cannot update/remove. For install/update/remove, use `npx debugsk@latest codex`.
+
 Use debugsk to install/update the skill, then restart Codex:
 
 ```
@@ -30,10 +25,11 @@ npx debugsk@latest codex update
 npx debugsk@latest codex remove
 ```
 
-By default this installs into `./.codex/skills` (current directory). Use `-u` to install to `~/.codex/skills`.
-If `./.codex` does not exist, debugsk will ask before creating it.
+`debugsk codex` installs to `./.codex/skills` by default (repo-local). Use `-u` to install to `~/.codex/skills`. If `./.codex` does not exist, debugsk will ask before creating it.
 
 ## Quick start (local debug log server)
+
+Note: This server is intended to be started by an AI workflow (via Skills). It is not meant as a manual end‑user tool. Use it only when an AI assistant instructs you to do so.
 
 Install-free usage with npx:
 
