@@ -1,10 +1,13 @@
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
+import { createRequire } from 'node:module'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { execa } from 'execa'
 
 const cliPath = path.resolve(__dirname, '../src/cli.ts')
+const require = createRequire(import.meta.url)
+const tsxLoader = require.resolve('tsx')
 
 describe('debugsk cli', () => {
   let tempDir: string
@@ -20,7 +23,7 @@ describe('debugsk cli', () => {
   it('start/status/stop lifecycle', async () => {
     const start = await execa(process.execPath, [
       '--import',
-      'tsx',
+      tsxLoader,
       cliPath,
       'start',
       '--json',
@@ -36,7 +39,7 @@ describe('debugsk cli', () => {
 
     const status = await execa(process.execPath, [
       '--import',
-      'tsx',
+      tsxLoader,
       cliPath,
       'status',
       '--json',
@@ -50,7 +53,7 @@ describe('debugsk cli', () => {
 
     const stop = await execa(process.execPath, [
       '--import',
-      'tsx',
+      tsxLoader,
       cliPath,
       'stop',
       '--json',
@@ -63,46 +66,27 @@ describe('debugsk cli', () => {
   })
 
   it('codex install/remove lifecycle', async () => {
-    const dest = path.join(tempDir, 'codex', 'code-debug-skill')
+    const codexHome = path.join(tempDir, '.codex')
+    const dest = path.join(codexHome, 'skills', 'code-debug-skill')
+    await fs.mkdir(codexHome, { recursive: true })
 
-    const install = await execa(process.execPath, [
-      '--import',
-      'tsx',
-      cliPath,
-      'codex',
-      'install',
-      '--json',
-      '--dest',
-      dest,
-    ])
+    const install = await execa(
+      process.execPath,
+      ['--import', tsxLoader, cliPath, 'codex', 'install', '--json'],
+      { cwd: tempDir },
+    )
 
     const installPayload = JSON.parse(install.stdout) as Record<string, unknown>
     expect(installPayload.ok).toBe(true)
 
-    const status = await execa(process.execPath, [
-      '--import',
-      'tsx',
-      cliPath,
-      'codex',
-      'status',
-      '--json',
-      '--dest',
-      dest,
-    ])
+    const stat = await fs.stat(dest)
+    expect(stat.isDirectory()).toBe(true)
 
-    const statusPayload = JSON.parse(status.stdout) as Record<string, unknown>
-    expect(statusPayload.installed).toBe(true)
-
-    const remove = await execa(process.execPath, [
-      '--import',
-      'tsx',
-      cliPath,
-      'codex',
-      'remove',
-      '--json',
-      '--dest',
-      dest,
-    ])
+    const remove = await execa(
+      process.execPath,
+      ['--import', tsxLoader, cliPath, 'codex', 'remove', '--json'],
+      { cwd: tempDir },
+    )
 
     const removePayload = JSON.parse(remove.stdout) as Record<string, unknown>
     expect(removePayload.ok).toBe(true)

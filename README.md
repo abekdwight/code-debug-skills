@@ -30,6 +30,9 @@ npx debugsk@latest codex update
 npx debugsk@latest codex remove
 ```
 
+By default this installs into `./.codex/skills` (current directory). Use `-u` to install to `~/.codex/skills`.
+If `./.codex` does not exist, debugsk will ask before creating it.
+
 ## Quick start (local debug log server)
 
 Install-free usage with npx:
@@ -86,7 +89,7 @@ Logs are written as JSONL under `.logs/`:
 - Claude Code plugin: `plugins/code-debug-skill-plugin/`
 - Marketplace file: `.claude-plugin/marketplace.json`
 
-The Skill defines the standardized investigation workflow and instrumentation rules. The plugin bundles the Skill with commands and sub-agents.
+The Skill defines the standardized investigation workflow and instrumentation rules. The plugin bundles the Skill only.
 
 Sync the skill source to all targets:
 

@@ -2,6 +2,7 @@
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
+import readline from 'node:readline/promises'
 import minimist from 'minimist'
 import {
   DEFAULT_BASE_PATH,
@@ -16,10 +17,11 @@ import { RuntimeInfo, markStopped, readRuntime, removePid } from './runtime'
 import { startServer } from './server'
 
 const args = minimist(process.argv.slice(2), {
-  boolean: ['json', 'force', 'help'],
-  string: ['host', 'base-path', 'logs-dir', 'token', 'dest', 'codex-home'],
+  boolean: ['json', 'force', 'help', 'user'],
+  string: ['host', 'base-path', 'logs-dir', 'token'],
   alias: {
     h: 'help',
+    u: 'user',
   },
 })
 
@@ -53,6 +55,10 @@ async function main(): Promise<void> {
       await handleStart()
       return
     case 'run':
+      if (!process.env.DEBUGSK_CHILD) {
+        outputError('use_start_command')
+        return
+      }
       await handleRun()
       return
     case 'status':
@@ -207,9 +213,6 @@ async function handleCodex(subcommand: string): Promise<void> {
     case 'remove':
       await codexRemove()
       return
-    case 'status':
-      await codexStatus()
-      return
     default:
       outputError(`unknown_command:codex:${subcommand}`)
   }
@@ -217,7 +220,7 @@ async function handleCodex(subcommand: string): Promise<void> {
 
 async function codexInstall(force: boolean): Promise<void> {
   const source = await resolveSkillSource()
-  const dest = resolveCodexDest()
+  const { dest, scope } = await resolveCodexDest({ createIfMissing: true })
   const exists = await pathExists(dest)
 
   if (exists && !force) {
@@ -236,6 +239,7 @@ async function codexInstall(force: boolean): Promise<void> {
   outputJsonResult({
     ok: true,
     action: force ? 'update' : 'install',
+    scope,
     dest,
     source,
     replaced: exists,
@@ -243,7 +247,18 @@ async function codexInstall(force: boolean): Promise<void> {
 }
 
 async function codexRemove(): Promise<void> {
-  const dest = resolveCodexDest()
+  const { dest, scope, homeExists } = await resolveCodexDest({ createIfMissing: false })
+  if (!homeExists) {
+    outputJsonResult({
+      ok: true,
+      action: 'remove',
+      scope,
+      dest,
+      removed: false,
+      reason: 'codex_home_missing',
+    })
+    return
+  }
   await ensureSafeDest(dest)
   const exists = await pathExists(dest)
   if (exists) {
@@ -252,19 +267,9 @@ async function codexRemove(): Promise<void> {
   outputJsonResult({
     ok: true,
     action: 'remove',
+    scope,
     dest,
     removed: exists,
-  })
-}
-
-async function codexStatus(): Promise<void> {
-  const dest = resolveCodexDest()
-  const installed = await pathExists(dest)
-  outputJsonResult({
-    ok: true,
-    action: 'status',
-    dest,
-    installed,
   })
 }
 
@@ -278,14 +283,19 @@ async function resolveSkillSource(): Promise<string> {
   throw new Error(`missing_skill_source:${SKILL_NAME}`)
 }
 
-function resolveCodexDest(): string {
-  if (args.dest) return path.resolve(String(args.dest))
-  const codexHome = args['codex-home']
-    ? path.resolve(String(args['codex-home']))
-    : process.env.CODEX_HOME
-      ? path.resolve(String(process.env.CODEX_HOME))
-      : path.join(os.homedir(), '.codex')
-  return path.join(codexHome, 'skills', SKILL_NAME)
+async function resolveCodexDest({
+  createIfMissing,
+}: {
+  createIfMissing: boolean
+}): Promise<{ dest: string; scope: 'user' | 'local'; homeExists: boolean }> {
+  const useUser = Boolean(args.user)
+  const scope: 'user' | 'local' = useUser ? 'user' : 'local'
+  const codexHome = useUser ? path.join(os.homedir(), '.codex') : path.join(process.cwd(), '.codex')
+  const exists = await pathExists(codexHome)
+  if (!exists && createIfMissing) {
+    await ensureCodexHome(codexHome, scope)
+  }
+  return { dest: path.join(codexHome, 'skills', SKILL_NAME), scope, homeExists: exists }
 }
 
 async function ensureSafeDest(dest: string): Promise<void> {
@@ -294,6 +304,26 @@ async function ensureSafeDest(dest: string): Promise<void> {
   if (resolved === root || resolved === os.homedir()) {
     throw new Error('unsafe_dest')
   }
+}
+
+async function ensureCodexHome(codexHome: string, scope: 'user' | 'local'): Promise<void> {
+  if (await pathExists(codexHome)) return
+  if (!process.stdin.isTTY) {
+    throw new Error('codex_home_missing')
+  }
+  const prompt = `Create ${codexHome} for ${scope} scope? [y/N]: `
+  const approved = await confirmPrompt(prompt)
+  if (!approved) {
+    throw new Error('codex_home_missing')
+  }
+  await fs.mkdir(codexHome, { recursive: true })
+}
+
+async function confirmPrompt(prompt: string): Promise<boolean> {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stderr })
+  const answer = await rl.question(prompt)
+  rl.close()
+  return /^y(es)?$/i.test(answer.trim())
 }
 
 async function pathExists(target: string): Promise<boolean> {
@@ -331,7 +361,7 @@ async function spawnBackground(options: {
     stdio: 'ignore',
     env: {
       ...process.env,
-      DEBUG_OBSERVER_CHILD: '1',
+      DEBUGSK_CHILD: '1',
     },
   })
   child.unref()
@@ -492,17 +522,15 @@ function printHelp(): void {
 
 Usage:
   server start --json     Start server in background and print JSON
-  server run              Run server in foreground
   server status --json    Show server status
   server stop --json      Stop background server
 
   codex install           Install Codex skill (user scope)
   codex update            Update Codex skill (user scope)
   codex remove            Remove Codex skill (user scope)
-  codex status            Show Codex skill status
 
 Aliases:
-  start/run/status/stop   Same as "server <command>"
+  start/status/stop       Same as "server <command>"
 
 Options:
   --host            (default ${DEFAULT_HOST})
@@ -514,8 +542,7 @@ Options:
   --idle-ttl-ms     (optional)
   --force           (restart even if already running)
   --json            (stdout JSON only)
-  --dest            (Codex skill destination path)
-  --codex-home      (override CODEX_HOME)
+  -u, --user        (install Codex skill to user scope)
 `
   if (json) {
     outputJson({ ok: true, help: text })
