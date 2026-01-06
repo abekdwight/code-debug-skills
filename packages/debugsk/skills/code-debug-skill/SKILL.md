@@ -66,6 +66,7 @@ description: Standardized, hypothesis-driven debug investigation workflow for un
 ## User interaction rules
 - When reproduction is required, provide exact steps, expected signals, and required artifacts.
 - If reproduction is not possible, pivot to existing logs, metrics, traces, config diffs, or safe probes.
+- After embedding debug code, explicitly ask the user whether to use a tunneling setup (e.g., ngrok/Cloudflare Tunnel) for external or mobile access; do not assume.
 
 ## Cleanup policy
 - When the user confirms the issue is resolved or the investigation is closed, stop the debug server and delete all investigation logs (e.g., `.logs/`).
@@ -73,7 +74,7 @@ description: Standardized, hypothesis-driven debug investigation workflow for un
 - If deletion could affect unrelated files, confirm the exact paths before removal.
 
 ## Reporting format
-Use the template in `assets/report-template.md`.
+Use the template in `assets/report-template.md`. The template is in English; localize headings and content to the user's language.
 
 ## References
 - Use `references/logging-schema.md` when adding or validating instrumentation.
