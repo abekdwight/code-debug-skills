@@ -14,7 +14,9 @@ description: Standardized, hypothesis-driven debug investigation workflow for un
   - required instrumentation (what to measure or log).
 - Prefer decisive signals over narratives. Do not ask for reproduction without a plan to capture evidence.
 - Narrow with comparisons (fail vs pass) and a binary-search style approach when possible.
-- Make the smallest change that increases observability. Avoid speculative fixes.
+- Add debug instrumentation generously to capture decisive signals in a single reproduction run.
+  - Assume each reproduction is costly; instrument enough to narrow root cause without requiring additional runs.
+- Never fix code speculatively. Confirm root cause with evidence before any production code change.
 
 ## Tool selection (what to use)
 - Primary tool for new instrumentation: local HTTP ingest logger.
@@ -74,7 +76,7 @@ description: Standardized, hypothesis-driven debug investigation workflow for un
 - If deletion could affect unrelated files, confirm the exact paths before removal.
 
 ## Reporting format
-Use the template in `assets/report-template.md`. The template is in English; localize headings and content to the user's language.
+Use the template in `assets/report-template.md`. Headings are bilingual (English / Japanese); write content in the user's language.
 
 ## References
 - Use `references/logging-schema.md` when adding or validating instrumentation.
