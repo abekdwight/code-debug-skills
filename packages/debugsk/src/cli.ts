@@ -11,6 +11,8 @@ import {
   DEFAULT_MAX_BODY_KB,
   DEFAULT_PORT,
 } from './constants'
+import { claudeInstall, claudeRemove, claudeUpdate } from './claude'
+import { installSkill, removeSkill } from './skill'
 import { isProcessAlive, terminateProcess } from './process'
 import { resolveLogsDir } from './paths'
 import { RuntimeInfo, markStopped, readRuntime, removePid } from './runtime'
@@ -27,7 +29,7 @@ const args = minimist(process.argv.slice(2), {
 
 const primary = String(args._[0] ?? 'help')
 const secondary = args._[1] ? String(args._[1]) : undefined
-const scope = primary === 'server' || primary === 'codex' ? primary : 'server'
+const scope = primary === 'server' || primary === 'codex' || primary === 'claude' ? primary : 'server'
 const command =
   scope === 'server' ? String(primary === 'server' ? secondary ?? 'help' : primary) : String(secondary ?? 'help')
 
@@ -47,6 +49,11 @@ async function main(): Promise<void> {
 
   if (scope === 'codex') {
     await handleCodex(command)
+    return
+  }
+
+  if (scope === 'claude') {
+    await handleClaude(command)
     return
   }
 
@@ -203,135 +210,54 @@ async function handleStop(): Promise<void> {
 }
 
 async function handleCodex(subcommand: string): Promise<void> {
+  const userScope = Boolean(args.user)
   switch (subcommand) {
     case 'install':
-      await codexInstall(false)
+      await codexInstall(false, userScope)
       return
     case 'update':
-      await codexInstall(true)
+      await codexInstall(true, userScope)
       return
     case 'remove':
-      await codexRemove()
+      await codexRemove(userScope)
       return
     default:
       outputError(`unknown_command:codex:${subcommand}`)
   }
 }
 
-async function codexInstall(force: boolean): Promise<void> {
-  const source = await resolveSkillSource()
-  const { dest, scope } = await resolveCodexDest({ createIfMissing: true })
-  const exists = await pathExists(dest)
-
-  if (exists && !force) {
-    outputError('codex_skill_already_installed')
-    return
-  }
-
-  await ensureSafeDest(dest)
-  if (exists) {
-    await fs.rm(dest, { recursive: true, force: true })
-  }
-
-  await fs.mkdir(path.dirname(dest), { recursive: true })
-  await fs.cp(source, dest, { recursive: true })
-
-  outputJsonResult({
-    ok: true,
-    action: force ? 'update' : 'install',
-    scope,
-    dest,
-    source,
-    replaced: exists,
-  })
-}
-
-async function codexRemove(): Promise<void> {
-  const { dest, scope, homeExists } = await resolveCodexDest({ createIfMissing: false })
-  if (!homeExists) {
-    outputJsonResult({
-      ok: true,
-      action: 'remove',
-      scope,
-      dest,
-      removed: false,
-      reason: 'codex_home_missing',
-    })
-    return
-  }
-  await ensureSafeDest(dest)
-  const exists = await pathExists(dest)
-  if (exists) {
-    await fs.rm(dest, { recursive: true, force: true })
-  }
-  outputJsonResult({
-    ok: true,
-    action: 'remove',
-    scope,
-    dest,
-    removed: exists,
-  })
-}
-
-async function resolveSkillSource(): Promise<string> {
-  const packageRoot = path.resolve(__dirname, '..')
-  const repoRoot = path.resolve(packageRoot, '..', '..')
-  const repoSource = path.join(repoRoot, 'skills', SKILL_NAME)
-  if (await pathExists(repoSource)) return repoSource
-  const packaged = path.join(packageRoot, 'skills', SKILL_NAME)
-  if (await pathExists(packaged)) return packaged
-  throw new Error(`missing_skill_source:${SKILL_NAME}`)
-}
-
-async function resolveCodexDest({
-  createIfMissing,
-}: {
-  createIfMissing: boolean
-}): Promise<{ dest: string; scope: 'user' | 'local'; homeExists: boolean }> {
-  const useUser = Boolean(args.user)
-  const scope: 'user' | 'local' = useUser ? 'user' : 'local'
-  const codexHome = useUser ? path.join(os.homedir(), '.codex') : path.join(process.cwd(), '.codex')
-  const exists = await pathExists(codexHome)
-  if (!exists && createIfMissing) {
-    await ensureCodexHome(codexHome, scope)
-  }
-  return { dest: path.join(codexHome, 'skills', SKILL_NAME), scope, homeExists: exists }
-}
-
-async function ensureSafeDest(dest: string): Promise<void> {
-  const resolved = path.resolve(dest)
-  const root = path.parse(resolved).root
-  if (resolved === root || resolved === os.homedir()) {
-    throw new Error('unsafe_dest')
+async function handleClaude(subcommand: string): Promise<void> {
+  const userScope = Boolean(args.user)
+  switch (subcommand) {
+    case 'install':
+      await claudeInstall(false, userScope)
+      return
+    case 'update':
+      await claudeUpdate(userScope)
+      return
+    case 'remove':
+      await claudeRemove(userScope)
+      return
+    default:
+      outputError(`unknown_command:claude:${subcommand}`)
   }
 }
 
-async function ensureCodexHome(codexHome: string, scope: 'user' | 'local'): Promise<void> {
-  if (await pathExists(codexHome)) return
-  if (!process.stdin.isTTY) {
-    throw new Error('codex_home_missing')
-  }
-  const prompt = `Create ${codexHome} for ${scope} scope? [y/N]: `
-  const approved = await confirmPrompt(prompt)
-  if (!approved) {
-    throw new Error('codex_home_missing')
-  }
-  await fs.mkdir(codexHome, { recursive: true })
-}
-
-async function confirmPrompt(prompt: string): Promise<boolean> {
-  const rl = readline.createInterface({ input: process.stdin, output: process.stderr })
-  const answer = await rl.question(prompt)
-  rl.close()
-  return /^y(es)?$/i.test(answer.trim())
-}
-
-async function pathExists(target: string): Promise<boolean> {
+async function codexInstall(force: boolean, userScope: boolean): Promise<void> {
   try {
-    await fs.access(target)
-    return true
-  } catch {
-    return false
+    const result = await installSkill('codex', { force, userScope })
+    outputJsonResult(result as unknown as Record<string, unknown>)
+  } catch (error) {
+    outputError(error instanceof Error ? error.message : 'unexpected_error')
+  }
+}
+
+async function codexRemove(userScope: boolean): Promise<void> {
+  try {
+    const result = await removeSkill('codex', { userScope })
+    outputJsonResult(result as unknown as Record<string, unknown>)
+  } catch (error) {
+    outputError(error instanceof Error ? error.message : 'unexpected_error')
   }
 }
 
@@ -529,6 +455,10 @@ Usage:
   codex update            Update Codex skill (user scope)
   codex remove            Remove Codex skill (user scope)
 
+  claude install          Install Claude skill (user scope)
+  claude update           Update Claude skill (user scope)
+  claude remove           Remove Claude skill (user scope)
+
 Aliases:
   start/status/stop       Same as "server <command>"
 
@@ -542,7 +472,7 @@ Options:
   --idle-ttl-ms     (optional)
   --force           (restart even if already running)
   --json            (stdout JSON only)
-  -u, --user        (install Codex skill to user scope)
+  -u, --user        (install skill to user scope)
 `
   if (json) {
     outputJson({ ok: true, help: text })

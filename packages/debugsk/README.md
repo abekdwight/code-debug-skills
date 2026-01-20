@@ -1,6 +1,6 @@
 # debugsk
 
-Debug investigation CLI (server + Codex skill management) for hypothesis-driven workflows.
+Debug investigation CLI (server + skill management for Claude Code and Codex) for hypothesis-driven workflows.
 
 ## Usage
 
@@ -24,12 +24,28 @@ Status:
 npx debugsk@latest server status --json
 ```
 
-Codex skill install/update/remove:
+## Claude Code Skill
+
+Install the skill directly to `~/.claude/skills/`:
 
 ```
-npx debugsk@latest codex install
-npx debugsk@latest codex update
-npx debugsk@latest codex remove
+npx debugsk@latest claude install -u
+npx debugsk@latest claude update -u
+npx debugsk@latest claude remove -u
+```
+
+Default install target is `./.claude/skills` (current directory). Use `-u` to install to `~/.claude/skills`.
+
+> **Warning**: Skills installed via npx take priority over plugin-installed skills. If you have both the plugin and a npx-installed skill, the npx-installed version will be used. To revert to the plugin version, run `npx debugsk@latest claude remove`.
+
+## Codex Skill
+
+Install the skill to `~/.codex/skills/`:
+
+```
+npx debugsk@latest codex install -u
+npx debugsk@latest codex update -u
+npx debugsk@latest codex remove -u
 ```
 
 Default install target is `./.codex/skills` (current directory). Use `-u` to install to `~/.codex/skills`.

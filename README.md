@@ -4,6 +4,8 @@ This repository standardizes the hypothesis-driven debugging process as reusable
 
 ## Quick start (Claude Code)
 
+**Option 1: Plugin (Recommended for most users)**
+
 Add this GitHub repository as a marketplace, then install the plugin:
 
 ```
@@ -12,6 +14,20 @@ Add this GitHub repository as a marketplace, then install the plugin:
 ```
 
 Restart Claude Code after installation to load the plugin.
+
+**Option 2: npx (For developers/testing)**
+
+You can also install the skill directly using npx:
+
+```
+npx debugsk@latest claude install
+npx debugsk@latest claude update
+npx debugsk@latest claude remove
+```
+
+> **Warning**: Skills installed via npx take priority over plugin-installed skills. If you have both the plugin and a npx-installed skill, the npx-installed version will be used. To revert to the plugin version, run `npx debugsk@latest claude remove`.
+
+`debugsk claude` installs to `./.claude/skills` by default (repo-local). Use `-u` to install to `~/.claude/skills`. If `./.claude` does not exist, debugsk will ask before creating it.
 
 ## Quick start (Codex)
 
