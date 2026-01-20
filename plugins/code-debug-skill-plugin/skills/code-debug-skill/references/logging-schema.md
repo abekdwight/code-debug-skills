@@ -2,12 +2,14 @@
 
 Use this schema when instrumenting. Keep fields small, structured, and correlated.
 
-## Required fields
-- `timestamp`: ms epoch or ISO-8601 string
-- `message`: short, human-readable message
-- `sessionId`: investigation session identifier
-- `runId`: single reproduction run identifier
-- `hypothesisId`: hypothesis identifier (e.g. "H1")
+**IMPORTANT: You MUST ALWAYS include all required fields when logging. Never omit any of them.**
+
+## Required fields (MUST ALWAYS be specified)
+- `timestamp`: ms epoch or ISO-8601 string — **ALWAYS include this**
+- `message`: short, human-readable message — **ALWAYS include this**
+- `sessionId`: investigation session identifier — **ALWAYS include this**
+- `runId`: single reproduction run identifier — **ALWAYS include this**
+- `hypothesisId`: hypothesis identifier (e.g. "H1") — **ALWAYS include this**
 
 ## Recommended fields
 - `location`: file:line or function name

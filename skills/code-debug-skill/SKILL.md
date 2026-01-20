@@ -62,6 +62,7 @@ description: Standardized, hypothesis-driven debug investigation workflow for un
 - Use native logs as reference alongside the added instrumentation.
 - Logs must never throw, avoid secrets/PII, and be easy to remove.
 - Record location, message, timestamp, and correlation fields in every event.
+- **YOU MUST ALWAYS include all log fields (timestamp, message, sessionId, runId, hypothesisId, location) in every log event. Never omit any field.**
 - Do not guard instrumentation behind environment flags. Write logs for the investigation, then remove them after completion.
 - AI inserts instrumentation and provides the exact reproduction steps; the user performs the reproduction run and shares the resulting logs.
 

@@ -1,6 +1,6 @@
 {
   "name": "code-debug-skill",
   "description": "Vendor-neutral debug investigation workflows (skills + agents + commands). Focus on hypothesis-driven debugging with standardized instrumentation.",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": { "name": "OSS Contributors" }
 }

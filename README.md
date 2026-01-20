@@ -53,13 +53,15 @@ npx debugsk@latest server status --json
 
 ## Log schema (minimal standard)
 
+**YOU MUST ALWAYS include all required fields when logging. Never omit any field.**
+
 Required fields:
 
-- timestamp (ms epoch or ISO8601)
-- message
-- sessionId
-- runId
-- hypothesisId
+- timestamp (ms epoch or ISO8601) — **ALWAYS include this**
+- message — **ALWAYS include this**
+- sessionId — **ALWAYS include this**
+- runId — **ALWAYS include this**
+- hypothesisId — **ALWAYS include this**
 
 Optional fields:
 

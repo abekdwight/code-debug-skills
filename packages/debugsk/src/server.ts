@@ -27,7 +27,9 @@ export type StartedServer = {
   close: () => Promise<void>
 }
 
-const REQUIRED_FIELDS = ['timestamp', 'message', 'sessionId', 'runId', 'hypothesisId'] as const
+// Note: While these fields should always be provided for proper investigation,
+// the server will use fallback values if missing to ensure no logs are lost.
+const LOG_FIELDS = ['timestamp', 'message', 'sessionId', 'runId', 'hypothesisId'] as const
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
@@ -88,25 +90,29 @@ export async function startServer(options: StartOptions): Promise<StartedServer>
           return
         }
 
-        const missing = REQUIRED_FIELDS.filter((field) => !(field in payload))
-        if (missing.length > 0) {
-          respondJson(res, 400, { ok: false, error: 'missing_fields', missing })
-          return
-        }
-
         const event = payload as Record<string, unknown>
-        const sessionId = String(event.sessionId)
-        const runId = String(event.runId)
-        const logPath = getSessionLogPath(logsDir, sessionId, runId)
-        await fs.mkdir(path.dirname(logPath), { recursive: true })
+
+        // Apply fallback values for missing fields to ensure no logs are lost
+        const timestamp = 'timestamp' in event ? event.timestamp : Date.now()
+        const message = 'message' in event ? event.message : ''
+        const sessionId = 'sessionId' in event ? String(event.sessionId) : ''
+        const runId = 'runId' in event ? String(event.runId) : ''
+        const hypothesisId = 'hypothesisId' in event ? String(event.hypothesisId) : ''
 
         const enriched = {
-          ...event,
+          timestamp,
+          message,
+          sessionId,
+          runId,
+          hypothesisId,
+          ...event, // Original values take precedence if present
           _meta: {
             streamId,
             receivedAt: Date.now(),
           },
         }
+        const logPath = getSessionLogPath(logsDir, sessionId, runId)
+        await fs.mkdir(path.dirname(logPath), { recursive: true })
 
         await fs.appendFile(logPath, `${JSON.stringify(enriched)}\n`, 'utf8')
 
