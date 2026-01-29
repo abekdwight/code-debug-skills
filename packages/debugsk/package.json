@@ -18,7 +18,11 @@
     "lint": "eslint .",
     "format": "prettier --check .",
     "format:write": "prettier --write .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "release": "pnpm publish",
+    "release:patch": "npm run build && npm version patch --no-git-tag-version && pnpm publish",
+    "release:minor": "npm run build && npm version minor --no-git-tag-version && pnpm publish",
+    "release:major": "npm run build && npm version major --no-git-tag-version && pnpm publish"
   },
   "engines": {
     "node": ">=18"
