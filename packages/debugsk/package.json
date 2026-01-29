@@ -1,6 +1,6 @@
 {
   "name": "debugsk",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Debug investigation CLI: server + skill management for Claude Code and Codex hypothesis-driven workflows.",
   "bin": {
     "debugsk": "dist/cli.js"
