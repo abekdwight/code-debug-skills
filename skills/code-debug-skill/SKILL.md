@@ -1,6 +1,6 @@
 ---
 name: code-debug-skill
-description: Standardized, hypothesis-driven debug investigation workflow for unexpected behavior, regressions, incidents, flaky tests, or production issues. Use to plan instrumentation, reproduce with decisive signals, compare runs, and narrow root cause without assuming any vendor or infrastructure.
+description: Use when a problem has already occurred and its cause is not known. Adds temporary logging to the code, reproduces the problem, and reads those logs to find the cause. Not for plain questions.
 ---
 
 # Bug Investigation Skill
